@@ -25,7 +25,13 @@ class DeployTester:
                                      conf['user-id'],
                                      conf['user-pw'],
                                      conf['db-id'],
-                                     conf['db-pw'])
+                                     conf['db-pw'],
+                                     
+                                     conf['uwsgi-ini'],
+                                     conf['uwsgi-service'],
+                                     conf['nginx-conf'],
+                                     conf['supervisor-celery'],
+                                     conf['supervisor-celerybeat'])
         print('DeployTester instantiated, test start')
 
         self.passed_count = 0 # keep track of total passed tests count
@@ -91,4 +97,14 @@ class DeployTester:
         else:
             self.failed_status = True
             print('setup_python_virtualenv failed')
+        return self.passed_count, self.failed_status
+
+    def test_pull_github_code(self):
+        status = self.autoserver.pull_github_code() # status will hold either True or nothing
+        if status == True:
+            self.passed_count += 1
+            print('pull_github_code successful')
+        else:
+            self.failed_status = True
+            print('pull_github_code failed')
         return self.passed_count, self.failed_status

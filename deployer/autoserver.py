@@ -6,8 +6,9 @@ class Autoserver(object):
     Autoserver wraps up basic commands needed for deploying and managing Ubuntu (Debian based) servers.
     '''
 
-    def __init__(self, project_name, github_repo, ip_address, root_pw, user_id, user_pw, db_id, db_pw):
-        # initialize Autoserver instance with github_repo, ip_address, root_pw, user_id, user_pw, db_id, and db_pw data
+    def __init__(self, project_name, github_repo, ip_address, root_pw, user_id, user_pw, db_id, db_pw, uwsgi_ini, uwsgi_service, nginx_conf, supervisor_celery, supervisor_celerybeat):
+        # initialize Autoserver instance with github_repo, ip_address, root_pw, user_id, user_pw, db_id, and db_pw
+        # uwsgi_ini, uwsgi_service, nginx_conf, supervisor_celery, supervisor_celerybeat data
         # you are most likely to get these data from config.py file
         self.PROJECT_NAME = project_name
         self.GITHUB_REPO = github_repo
@@ -17,6 +18,13 @@ class Autoserver(object):
         self.USER_PW = user_pw
         self.DB_ID = db_id
         self.DB_PW = db_pw
+
+        # configuration file names
+        self.UWSGI_INI = uwsgi_ini
+        self.UWSGI_SERVICE = uwsgi_service
+        self.NGINX_CONF = nginx_conf
+        self.SUPERVISOR_CELERY = supervisor_celery
+        self.SUPERVISOR_CELERYBEAT = supervisor_celerybeat
 
     ### TEST PASSED ###
     def set_root_password(self):
@@ -51,8 +59,8 @@ class Autoserver(object):
         run('sudo ufw allow 5432')
         # moving postgresql configuration files to server
         # this is needed to allow access from remote computers to server
-        put('.\\config\\postgresql\\postgresql.conf', '/etc/postgresql/9.5/main/postgresql.conf')
-        put('.\\config\\postgresql\\pg_hba.conf', '/etc/postgresql/9.5/main/pg_hba.conf')
+        put('./config/postgresql/postgresql.conf', '/etc/postgresql/9.5/main/postgresql.conf')
+        put('./config/postgresql/pg_hba.conf', '/etc/postgresql/9.5/main/pg_hba.conf')
         # start, enable and restart postgresql service
         run('sudo systemctl start postgresql.service')
         run('sudo systemctl enable postgresql.service')
@@ -77,12 +85,31 @@ class Autoserver(object):
         run('sudo -H pip3 install virtualenv virtualenvwrapper')
         # configure virtualenvwrapper to load on terminal open
         run('echo "export VIRTUALENVWRAPPER_PYTHON=/usr/bin/python3" >> ~/.bashrc')
-        run('echo "export WORKON_HOME=/home/arbiter/venv" >> ~/.bashrc')
+        run('echo "export WORKON_HOME=/home/{}/venv" >> ~/.bashrc'.format(self.USER_ID))
         run('echo "source /usr/local/bin/virtualenvwrapper.sh" >> ~/.bashrc')
         # final step of this is to reboot server
         run('source ~/.bashrc')
         return True
 
+    ### TEST PASSED ###
+    def pull_github_code(self):
+        # create project folder to move your github code into
+        run('mkdir /home/{0}/{1}'.format(self.USER_ID, self.PROJECT_NAME))
+        with cd('/home/{0}/{1}'.format(self.USER_ID, self.PROJECT_NAME)):
+            run('git clone {} .'.format(self.GITHUB_REPO)) # clone your github code
+            repo_name = self.GITHUB_REPO.split('/')[-1].split('.')[0] # get your github repo name
+            with settings(warn_only=True):
+                # move your github repo code into your specified directory
+                run('mv ./{0} ./{1}'.format(repo_name, self.PROJECT_NAME))
+        return True
+
     def setup_nginx_uwsgi(self):
         run('sudo apt-get install build-essential nginx')
         run('sudo -H pip3 install uwsgi')
+        run('sudo mkdir -p /etc/uwsgi/sites')
+        # move uwsgi configuration files
+        run('sudo cp /home/{0}/{1}/config/uwsgi/{2}.ini /etc/uwsgi/sites/{3}.ini'.format(self.USER_ID,
+                                                                                         self.PROJECT_NAME,
+                                                                                         self.PROJECT_NAME,
+                                                                                         self.PROJECT_NAME))
+        run('sudo cp /home/{}/config/uwsgi/uwsgi.service /etc/systemd/system/uwsgi.service'.format(self.USER_ID))

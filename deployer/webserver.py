@@ -16,7 +16,12 @@ def deploy_webserver():
                             conf['user-id'],
                             conf['user-pw'],
                             conf['db-id'],
-                            conf['db-pw'])
+                            conf['db-pw'],
+                            conf['uwsgi-ini'],
+                            conf['uwsgi-service'],
+                            conf['nginx-conf'],
+                            conf['supervisor-celery'],
+                            conf['supervisor-celerybeat'])
     autoserver.set_root_password()
     with settings(warn_only=True):
         autoserver.create_user()
@@ -27,4 +32,5 @@ def deploy_webserver():
     # create virtualenv directly
     run('echo "Python virtualenv cannot be created with fabric, please type in (mkvirtualenv [project name])"')
     open_shell() # mkvirtualenv {project name}
-    autoserver.setup_nginx_uwsgi()
+    autoserver.pull_github_code()
+    # autoserver.setup_nginx_uwsgi()

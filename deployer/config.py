@@ -11,7 +11,12 @@ root-pw,
 user-id,
 user-pw,
 db-id,
-db-pw)
+db-pw,
+uwsgi-ini,
+uwsgi-service,
+nginx-conf,
+supervisor-celery,
+supervisor-celerybeat)
 
 you can also add other key values to use in the program
 '''
@@ -37,6 +42,7 @@ CONFIG = {
     'crawler': {
     },
 
+    # ar_test_server
     'test': {
         'project-name': 'buzzz',
         'github-repo': '',
@@ -45,6 +51,11 @@ CONFIG = {
         'user-id': 'arbiter',
         'user-pw': 'projectargogo!',
         'db-id': 'arbiter',
-        'db-pw': 'projectAR!gogo'
+        'db-pw': 'projectAR!gogo',
+        'uwsgi-ini': 'buzzz.ini',
+        'uwsgi-service': 'uwsgi.service',
+        'nginx-conf': 'buzzz.conf',
+        'supervisor-celery': 'celery.conf',
+        'supervisor-celerybeat': 'celerybeat.conf'
     }
 }
