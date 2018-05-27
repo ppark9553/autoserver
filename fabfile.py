@@ -6,26 +6,24 @@ from fabric.api import cd, env, local, run, hosts, get, put, sudo
 
 from deployer.config import CONFIG
 from deployer.webserver import deploy_webserver
+from deployer.dbserver import deploy_dbserver
 from deployer.test import DeployTester
 
 env.hosts = [
-    CONFIG['arbiter-web']['ip-address'], # 0
+    CONFIG['web']['ip-address'], # 0
     CONFIG['test']['ip-address'], # 1
+    CONFIG['db']['ip-address'], # 2
 ]
 
 env.user = 'root'
 
-REPO_URL = 'https://github.com/WeareArbiter/Arbiter-Keystone-BuzzzLightYear.git'
-
-def deploy():
-    site_folder = f'/home/{env.user}/sites/{env.host}'
-    run(f'mkdir -p {site_folder}')
-    with cd(site_folder):
-        run('pwd')
-
 @hosts(env.hosts[0])
 def auto_deploy_webserver():
     deploy_webserver()
+
+@hosts(env.hosts[2])
+def auto_deploy_dbserver():
+    deploy_dbserver()
 
 def test(tester, func_name):
     # wrapper for testing DeployTester methods

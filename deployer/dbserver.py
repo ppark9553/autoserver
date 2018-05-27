@@ -5,10 +5,10 @@ from fabric.operations import open_shell
 from .autoserver import Autoserver
 from .config import CONFIG
 
-conf = CONFIG['web']
+conf = CONFIG['db']
 
-def deploy_webserver():
-    # deploys webserver using Autoserver instance with 'web' data
+def deploy_dbserver():
+    # deploys dbserver using Autoserver instance with 'db' data
     autoserver = Autoserver(conf['project-name'],
                             conf['github-repo'],
                             conf['ip-address'],
@@ -36,4 +36,5 @@ def deploy_webserver():
     autoserver.pull_github_code()
     autoserver.setup_nginx_uwsgi()
     autoserver.send_django_config_file()
-    # autoserver.start_django_test_server_as_daemon()
+    autoserver.setup_redis()
+    autoserver.start_django_test_server_as_daemon()

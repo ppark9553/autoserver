@@ -26,7 +26,7 @@ class DeployTester:
                                      conf['user-pw'],
                                      conf['db-id'],
                                      conf['db-pw'],
-                                     
+
                                      conf['uwsgi-ini'],
                                      conf['uwsgi-service'],
                                      conf['nginx-conf'],
@@ -107,4 +107,14 @@ class DeployTester:
         else:
             self.failed_status = True
             print('pull_github_code failed')
+        return self.passed_count, self.failed_status
+
+    def test_setup_nginx_uwsgi(self):
+        status = self.autoserver.setup_nginx_uwsgi() # status will hold either True or nothing
+        if status == True:
+            self.passed_count += 1
+            print('setup_nginx_uwsgi successful')
+        else:
+            self.failed_status = True
+            print('setup_nginx_uwsgi failed')
         return self.passed_count, self.failed_status
